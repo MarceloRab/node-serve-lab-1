@@ -155,6 +155,12 @@ sequelize.sync({ force: isTest || isProduction }).then(async () => {
   });
 });
 
+/* httpServer.listen({ port: process.env.PORT || 4000 }, () => { 
+  //console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
+  console.log(`🚀 Server ready at ${url}`);
+  //console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
+
+}); */
 
 
 

@@ -127,6 +127,8 @@ const httpServer = http.createServer(app);
 //app.use('/graphql', bodyParser.json(), graphiqlExpress({ schema: typeDefs, subscriptionsEndpoint: `ws://localhost:${port}${server.graphqlPath}` }));
 //app.get('/graphql', graphiqlExpress({ endPointURL: '/graphql' }));
 
+app.use('/', express.static('../public')); // para heroku
+
 
 //   ######   #############    333#####################################
 server.installSubscriptionHandlers(httpServer);

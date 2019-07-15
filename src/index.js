@@ -139,30 +139,32 @@ const isProduction = !!process.env.DATABASE_URL;
 
 sequelize.sync({ force: isTest || isProduction }).then(async () => {
 
- /*  if (isTest || isProduction) {
-    try {
-      console.log("index main teste adiciona _________ ... ______");
-      createUsersWithMessages(new Date());
-    }
-    catch (erro) {
-      console.log('index main----' + erro);
+  /*  if (isTest || isProduction) {
+     try {
+       console.log("index main teste adiciona _________ ... ______");
+       createUsersWithMessages(new Date());
+     }
+     catch (erro) {
+       console.log('index main----' + erro);
+ 
+     }
+   } */
 
-    }
-  } */
-
-  httpServer.listen({ port: port }, () => {
+  /* httpServer.listen({ port: port }, () => {
     console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
     console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`)
+
+  }); */
+
+  httpServer.listen({ port: process.env.PORT || 4000 }, () => {
+    console.log("🚀 The server is running.");
+    //console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
+    //console.log(`🚀 Server ready at ${url}`);
+    //console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
 
   });
 });
 
-/* httpServer.listen({ port: process.env.PORT || 4000 }, () => { 
-  //console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
-  //console.log(`🚀 Server ready at ${url}`);
-  //console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
-
-}); */
 
 
 

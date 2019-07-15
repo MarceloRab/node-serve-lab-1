@@ -4,7 +4,10 @@
   "description": "server apollo com subscription",
   "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./www.js",
+    "build": "grunt dist",
+    "postinstall": "./node_modules/bower/bin/bower install && npm run build"
   },
   "author": "antonio rabelo",
   "license": "ISC",

@@ -7,29 +7,12 @@ const express = require('express');
 const cors = require('cors');
 //const connect = require('connect');
 const jwt = require('jsonwebtoken');
-
-const DataLoader  = require( 'dataloader');
-
+const DataLoader = require('dataloader');
 //const { execute, subscribe } = require(  'graphql');
-const graphiqlExpress = require('express-graphql');
-const bodyParser = require('body-parser')
-const { execute, subscribe } = require('graphql');
 //const { SubscriptionClient  } = require( 'subscriptions-transport-ws');
-const { SubscriptionServer } = require('subscriptions-transport-ws');
-const { SubscriptionClient, addGraphQLSubscriptions } = require('subscriptions-transport-ws');
-const ApolloClient = require('apollo-boost');
-const { ApolloLink } = require('apollo-link');
-const { createHttpLink } = require('apollo-link-http');
-const { InMemoryCache } = require('apollo-cache-inmemory');
-const { split } = require('apollo-link');
-//onst fetch = require( 'isomorphic-fetch');
-const ws = require('ws');
-const { HttpLink } = require('apollo-link-http');
-const { WebSocketLink } = require('apollo-link-ws');
-const { getMainDefinition } = require('apollo-utilities');
-const fetch = require('node-fetch');
-
-const loaders = require(  './loaders');
+//const ws = require('ws');
+//const fetch = require('node-fetch');
+const loaders = require('./loaders');
 
 
 const {
@@ -82,22 +65,6 @@ const getMe = async req => {
   }
 };
 
-/* const batchUsers = async (keys, db) => {
-  const users = await db.user.findAll({
-    where: {
-      id: {
-        $in: keys,
-      },
-    },
-  });
-  let listKeysUSers = keys.map(key => users.find(user => user.id === key));
-
-  console.log("index main "+ JSON.stringify(listKeysUSers));
-
-  return listKeysUSers ;
-};
-
-const userLoader = new DataLoader(keys => batchUsers(keys, db)); */
 
 const server = new ApolloServer({
   introspection: true,
@@ -157,223 +124,34 @@ server.applyMiddleware({ app, path: '/graphql' });
 const port = normalizePort(process.env.Port || '4000'); // porta normalizada
 const httpServer = http.createServer(app);
 
-app.use('/graphql', bodyParser.json(), graphiqlExpress({ schema: typeDefs, subscriptionsEndpoint: `ws://localhost:${port}${server.graphqlPath}` }));
-app.get('/graphql', graphiqlExpress({ endPointURL: '/graphql' }));
+//app.use('/graphql', bodyParser.json(), graphiqlExpress({ schema: typeDefs, subscriptionsEndpoint: `ws://localhost:${port}${server.graphqlPath}` }));
+//app.get('/graphql', graphiqlExpress({ endPointURL: '/graphql' }));
 
-
-
-const createApolloClient = () => {
-  //const createApolloClient = (authToken) =>{
-  return new ApolloClient({
-    link: new WebSocketLink({
-      uri: `ws://localhost:${port}${server.graphqlPath}`,
-      options: {
-        reconnect: true,
-        connectionParams: {
-          headers: {
-            // Authorization: `Bearer ${authToken}` 
-
-          }
-        }
-      }
-    }),
-    cache: new InMemoryCache()
-  });
-};
-
-
-
-const createApolloClient2 = () => {
-  //const createApolloClient = (authToken) =>{
-  const http = new HttpLink({
-    uri: `http://localhost:${port}/graphql`,
-    fetch,
-  });
-
-  const wsForNode = typeof window === "undefined" ? ws : null
-
-  //...
-
-  const wsClient = new SubscriptionClient(
-    `wss://localhost:${port}${server.graphqlPath}`,
-    {
-      reconnect: true
-    },
-    wsForNode
-  )
-
-  //...
-  const websocket = new WebSocketLink(wsClient)
-};
-
-createApolloClient2();
-
-/* const networkInterface = createHttpLink({ uri:
-  `http://localhost:${port}${server.graphqlPath}`});
-
-  networkInterface.use([{
-    applyMiddleware(req, next) {
-      setTimeout(next, 500);
-    },
-  }]);
-
-  const wsClient = new SubscriptionClient(`ws://localhost:${port}/subscriptions`, {
-  reconnect: true,});
-
-  const networkInterfaceWithSubscriptions = addGraphQLSubscriptions(
-    networkInterface,
-    wsClient,
-  );
-
-  const client = new ApolloClient({
-    networkInterface: networkInterfaceWithSubscriptions,    
-  }); */
-
-
-/* new SubscriptionServer({
-  execute,
-  subscribe,
-  typeDefs
-}, {
-  server: httpServer,
-  path: '/subscriptions',
-}); */
 
 //   ######   #############    333#####################################
 server.installSubscriptionHandlers(httpServer);
 
-let apolloClient = null
-
-const httpUri = `http://localhost:${port}/graphql`;
-const wsUri = `ws://localhost:${port}${server.graphqlPath}`;
-
-// Polyfill fetch() on the server (used by apollo-client)
-if (!process.browser) {
-  global.fetch = fetch
-}
-
-const client = new SubscriptionClient(
-  wsUri,
-  {
-    reconnect: true
-  },
-  ws
-);
-
-const hasSubscriptionOperation = ({ query: { definitions } }) =>
-  definitions.some(
-    ({ kind, operation }) =>
-      kind === 'OperationDefinition' && operation === 'subscription'
-  );
-
-const link = ApolloLink.split(
-  hasSubscriptionOperation,
-  new WebSocketLink(client),
-  new HttpLink({ uri: httpUri, fetch })
-);
-
-const create = (initialState) => {
-  return new ApolloClient({
-    connectToDevTools: process.browser,
-    ssrMode: !process.browser, // Disables forceFetch on the server (so queries are only run once)
-    link,
-    cache: new InMemoryCache().restore(initialState || {})
-  })
-};
-
-const initApollo = (initialState) => {
-  // Make sure to create a new client for every server-side request so that data
-  // isn't shared between connections (which would be bad)
-  if (!process.browser) {
-    return create(initialState)
-  }
-
-  // Reuse client on the client-side
-  if (!apolloClient) {
-    apolloClient = create(initialState)
-  }
-
-  return apolloClient
-};
-
-/* const uri = `http://localhost:4000/graphql`;
-const wsUri = `ws://localhost:4000/graphql`;
-// Create an http link:
-const httpLink = new HttpLink({ uri, fetch });
-
-const wsClient = new SubscriptionClient(wsUri, { reconnect: true }, ws);
-const wsLink = new WebSocketLink(wsClient); */
-
-/* const wsLink = new WebSocketLink({
-  uri: wsUri,
-  options: {
-    reconnect: true
-  }
-}); */
-// Create a WebSocket link:
-/* const wsLink = new WebSocketLink({
-  //uri: `ws://localhost:${port}${server.subscriptionsPath}`,
-  uri: wsUri,
-  options: {
-    reconnect: true
-  }
-}); */
-
-
-/* const terminatingLink = split(
-  ({ query }) => {
-    const { kind, operation } = getMainDefinition(query);
-    return (
-      kind === 'OperationDefinition' && operation === 'subscription'
-    );
-  },
-  wsLink,
-  httpLink,
-); */
-
-
-/* app.use('/graphiql', graphiqlExpress({
-  endpointURL: '/graphql',
-  subscriptionsEndpoint: `ws://localhost:4000/graphql/subscriptions`
-}));
- */
-const eraseDatabaseOnSync = false;
-
+//const eraseDatabaseOnSync = false;
 const isTest = !!process.env.TEST_DATABASE; // !! retorna objeto?
 const isProduction = !!process.env.DATABASE_URL;
 
 sequelize.sync({ force: isTest || isProduction }).then(async () => {
 
-  if (isTest || isProduction) {
+ /*  if (isTest || isProduction) {
     try {
-
       console.log("index main teste adiciona _________ ... ______");
       createUsersWithMessages(new Date());
     }
-
     catch (erro) {
       console.log('index main----' + erro);
 
     }
-  }
+  } */
 
   httpServer.listen({ port: port }, () => {
     console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
     console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`)
 
-    //createApolloClient();
-    //createApolloClient2();
-
-    //initApollo();
-
-    /* new SubscriptionServer({
-      execute,
-      subscribe,
-      typeDefs
-    }, {
-      server: httpServer,
-      path: '/subscriptions',
-    }); */
   });
 });
 
@@ -456,15 +234,6 @@ const createUsersWithMessages = async date => {
       include: [db.message],
     },
   );
-
-
-  /* user: {
-             id: "1",
-             username: "Marcelo Rabelo"
-           } */
-
-
-
 
 
 

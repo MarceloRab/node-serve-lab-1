@@ -2,12 +2,9 @@
   "name": "dev_apollo",
   "version": "1.0.0",
   "description": "server apollo com subscription",
-  "main": "server.js",
+  "main": "./src/index.js",
   "scripts": {
-    "dev": "node server.js",
-    "build": "next build",
-    "postinstall": "npm run build",
-    "start": "NODE_ENV=production node ./src/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "antonio rabelo",
   "license": "ISC",
@@ -28,5 +25,8 @@
     "pg": "^7.11.0",
     "sequelize": "^5.9.0",
     "uuid": "^3.3.2"
+  },
+  "engines": {
+    "node": "12.x"
   }
 }

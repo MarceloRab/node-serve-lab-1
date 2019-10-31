@@ -26,7 +26,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.14",
     "pg": "^7.11.0",
-    "sequelize": "^5.9.0",
+    "sequelize": "^5.15.1",
     "uuid": "^3.3.2"
   },
   "engines": {
